@@ -1,11 +1,11 @@
 import java.util.NoSuchElementException;
 
-public class LinkedList{
+public class MyLinkedList{
 
   private int length;
   private Node start,end;
 
-  public LinkedList(){
+  public MyLinkedList(){
     length = 0;
   }
 
