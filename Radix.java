@@ -1,6 +1,12 @@
 public class Radix{
+  public static void main(String[] args) {
+    int[] data = {500, 250, 119, 10, 5};
 
-  
+    radixsort(data);
+
+    System.out.println(toString(data));
+  }
+
   public static void radixsort(int[]data){
     int highest = findBiggest(data);
     MyLinkedList[] buckets = new MyLinkedList[20];
@@ -24,5 +30,13 @@ public class Radix{
 
     if (highest < 0) return (highest + "").length() - 1;
     return (highest + "").length();
+  }
+
+  public static String toString(int[] data){
+    String output = "";
+    for (int x: data){
+      output += x;
+    }
+    return output;
   }
 }
