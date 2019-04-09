@@ -1,153 +1,131 @@
 import java.util.NoSuchElementException;
 
-public class MyLinkedList{
+public class MyLinkedList<E> {
+  private int size;
+  private Node start, end, current;
 
-  private int length;
-  private Node start,end;
-
-  public MyLinkedList(){
-    length = 0;
+  public MyLinkedList() {
+    size = 0;
   }
 
-  public boolean add(Integer value){
-    if (length == 0){ // Special case; if length is equal to 0, then there's no next or previous
-      Node out = new Node(value, null, null);
-      start = out;
+  public int size() {
+    return size;
+  }
+
+  public void clear() {
+    size = 0;
+    start = null;
+    end = null;
+    current = null;
+  }
+
+  public boolean add(E value) {
+    if (size == 0) {
+      start = new Node(value);
       end = start;
-      length++;
+      size++;
       return true;
     }
-    else{
-      Node out = new Node(value, null, end.getPrev()); // Since it's always being added to the end, the next is always null
-      end.setNext(out);
-      out.setPrev(end);
-      end = end.getNext();
-      length++;
-      return true;
+    end.setNext(new Node(end));
+    end = end.next();
+    end.set(value);
+    size++;
+    return true;
+  }
+
+  public E removeFront() {
+    if (size == 0) throw new IndexOutOfBoundsException();
+    if (size == 1) {
+      E ans = start.value();
+      start = null;
+      end = null;
+      size = 0;
+      return ans;
     }
+    Node old = start;
+    start = old.next();
+    start.setPrev(null);
+    size--;
+    return old.value();
   }
 
-  public int size(){
-    return length;
-  }
-
-  public Integer get(int n){
-    if (n < 0 || n > length) throw new IndexOutOfBoundsException();
-    return getNth(n).getData();
-  }
-
-  public Integer set(int index, Integer value){
-    if (index < 0 || index > length) throw new IndexOutOfBoundsException();
-    Node at = getNth(index);
-    Integer output = at.getData();
-    at.setData(value);
-    return output;
-  }
-
-  public boolean contains(Integer value){
-    Node upto = start;
-    for (int x = 0; x < length; x++){
-      if (upto.getData() == value){
-        return true;
-      }
-      upto = upto.getNext();
+  public void extend(MyLinkedList<E> other) {
+    if (size == 0) {
+      start =  other.start;
+      end = other.end;
+      size = other.size;
     }
-    return false;
-  }
-
-  public int indexOf(Integer value){
-    Node upto = start;
-    for (int x = 0; x < length; x++){
-      if (upto.getData().equals(value)){
-        return x;
-      }
-      upto = upto.getNext();
-    }
-    return -1;
-  }
-
-  private Node getNth(int n){
-    if (n < 0 || n > length) throw new IndexOutOfBoundsException();
-    Node temp = start;
-    for (int count = 0; count != n; count++) { // Cycle until you hit the index
-      temp = temp.getNext();
-    }
-    return temp;
-  }
-
-  public void add(int n, Integer value){
-    if (n < 0 || n > length) throw new IndexOutOfBoundsException();
-    if (n == 0){ // If its added to the beginning,then the previous is always null
-      Node added = new Node(value, start, null);
-      start.setPrev(added);
-      start = start.getPrev();
-      length++;
-    }
-    else {
-      Node temp = new Node(value, getNth(n), getNth(n - 1));
-      if (n == length){ // If it's equal to the end, then you can just use the old add function
-        add(value);
-      }
-      else{
-        getNth(n).setPrev(temp);
-        getNth(n - 1).setNext(temp);
-        length++;
-      }
-  }
-}
-
-  public Integer remove(int n){
-    if (n < 0 || n > length) throw new IndexOutOfBoundsException();
-    Node at = getNth(n);
-    Integer output = at.getData();
-    if (n == length - 1){   // If it's at the end, then you need to adjust the null accordingly
-      at.getPrev().setNext(null);
-      end = at.getPrev();
-      length--;
-      return output;
-    }
-    if (n == 0){ // Same with the beginning
-      at.getNext().setPrev(null);
-      start = at.getNext();
-      length--;
-      return output;
-    }
-    at.getPrev().setNext(at.getNext());
-    at.setPrev(at.getPrev());
-    length--;
-    return output;
-  }
-
-  public boolean remove(Integer n){
-    try{
-      remove(indexOf(n));
-      return true;
-    }
-    catch(IndexOutOfBoundsException e){
-      return false;
-    }
-  }
-
-   public void extend(MyLinkedList other){ // O(1)
-      this.end.setNext(other.start);
+    else if (other.size != 0) {
+      end.setNext(other.start);
       other.start.setPrev(end);
-      this.end = other.end;
-      this.length += other.length;
-      other.length = 0;
+      end = other.end;
+      size += other.size();
+    }
+    other.end = null;
+    other.start = null;
+    other.size = 0;
+    current = null;
+  }
 
-        //in O(1) runtime, move the elements from other onto the end of this
-        //The size of other is reduced to 0
-        //The size of this is now the combined sizes of both original lists
+  public boolean hasNext() {
+    return current != end;
+  }
+
+  public E next() {
+    if (current != null && current.next() == null) throw new NoSuchElementException();
+    if (current == null) current = start;
+    else current = current.next();
+    return current.value();
+  }
+
+  public String toString() {
+    String output = "";
+    Node current = start;
+    while (current.hasNext()){
+      output += current.value() + ", ";
+      current = current.next();
+    }
+    return output + current.value();
+  }
+
+  private class Node {
+    private E data;
+    private Node next, prev;
+
+    public Node(Node last) {
+      prev = last;
     }
 
-  public String toString(){
-    String output = "[";
-    Node upto = start;
-    for (int x = 0; x < length; x++){
-      output += upto.getData();
-      upto = upto.getNext();
-      if (x + 1 != length) output += ", ";
+    public Node(E val) {
+      data = val;
     }
-    return output += "]";
+
+    public Node next() {
+      return next;
+    }
+
+    public Node prev() {
+      return prev;
+    }
+
+    public void setNext(Node newNext) {
+      next = newNext;
+    }
+
+    public void setPrev(Node newPrev) {
+      prev = newPrev;
+    }
+
+    public boolean hasNext() {
+      return next != null;
+    }
+
+    public E value() {
+      return data;
+    }
+
+    public void set(E value) {
+      data = value;
+    }
   }
 }
