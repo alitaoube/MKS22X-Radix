@@ -1,13 +1,4 @@
 public class Radix{
-  public static void main(String[] args) {
-  Radix r = new Radix();
-  int[] test = {1, 64, -17, 19, 0, -4, -7, 8, 67, 54, -48, 100, 56, 7, -99, 50, 84, -25, -67};
-  Radix.radixsort(test);
-  System.out.println(toString(test));
-}
-
-
-
   public static void radixsort(int[] data) {
     int max = findBiggest(data) - 1;
     int track = 0;
@@ -16,26 +7,23 @@ public class Radix{
     MyLinkedList<Integer> list = new MyLinkedList<Integer>();
 
     //init buckets
-    for (int x = 0; x < 20; x ++){
-      buckets[x] = new MyLinkedList<Integer>();
-    }
+    for (int i = 0; i < buckets.length; i++) buckets[i] = new MyLinkedList<Integer>();
 
     // assign vals
-    for (int x = 0; x < data.length; x ++) {
-      int num = data[x];
-      int dig = Math.abs((int)(num/Math.pow(10, track)) % 10);
-      if (num < 0){
-        buckets[9 - dig].add(num);
+
+    for (int x: data){
+      int dig = Math.abs((int)(x/Math.pow(10, track)) % 10);
+      if (x < 0){
+        buckets[9 - dig].add(x);
       }
       else{
-        buckets[dig + 10].add(num);
+        buckets[dig + 10].add(x);
       }
     }
 
     // connects buckets
-    for (int x = 0; x < buckets.length; x++) {
-      list.extend(buckets[x]);
-      // clear buckets
+    for (MyLinkedList<Integer> i : buckets) {
+      list.extend(i);
     }
 
     track++;
@@ -56,6 +44,7 @@ public class Radix{
       track++;
       max--;
     }
+
     for (int i = 0; i < data.length; i++) {
       data[i] = list.removeFront();
     }
