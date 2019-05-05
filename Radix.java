@@ -1,5 +1,16 @@
 public class Radix{
+  public static void main(String[] args) {
+  Radix r = new Radix();
+  int[] test = {1, 64, -17, 19, 0, -4, -7, 8, 67, 54, -48, 100, 56, 7, -99, 50, 84, -25, -67};
+  Radix.radixsort(test);
+  System.out.println(toString(test));
+}
+
+
+
   public static void radixsort(int[] data) {
+    int max = findBiggest(data) - 1;
+    int track = 0;
     @SuppressWarnings({"unchecked"})
     MyLinkedList<Integer>[] buckets = new MyLinkedList[20];
     MyLinkedList<Integer> list = new MyLinkedList<Integer>();
@@ -9,12 +20,10 @@ public class Radix{
       buckets[x] = new MyLinkedList<Integer>();
     }
 
-    int max = findBiggest(data);
-
     // assign vals
     for (int x = 0; x < data.length; x ++) {
       int num = data[x];
-      int dig = Math.abs(num) % 10;
+      int dig = Math.abs((int)(num/Math.pow(10, track)) % 10);
       if (num < 0){
         buckets[9 - dig].add(num);
       }
@@ -27,15 +36,13 @@ public class Radix{
     for (int x = 0; x < buckets.length; x++) {
       list.extend(buckets[x]);
       // clear buckets
-      buckets[x] = new MyLinkedList<Integer>();
     }
 
-    int place = 10;
-    while (place <= max) {
-      while (list.hasNext()) {
+    track++;
+    while (max > 0){
+      while (list.size() > 0){
         int num = list.removeFront();
-        int dig = (Math.abs(num) / place) % 10;
-
+        int dig = Math.abs((int)(num/Math.pow(10, track)) % 10);
         if (num < 0){
           buckets[9 - dig].add(num);
         }
@@ -43,17 +50,14 @@ public class Radix{
           buckets[dig + 10].add(num);
         }
       }
-      list.clear();
-      for (int x = 0; x < 20; x ++) {
-        list.extend(buckets[x]);
+      for (MyLinkedList<Integer> i : buckets) {
+        list.extend(i);
       }
-      place *= 10;
-      list.clear();
+      track++;
+      max--;
     }
-    int x = 0;
-
-    while (list.hasNext()){
-      data[x++] = list.next();
+    for (int i = 0; i < data.length; i++) {
+      data[i] = list.removeFront();
     }
   }
 
